@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-import ch.qos.logback.classic.Level;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firestore.v1.FirestoreGrpc;
 import io.grpc.CallCredentials;
@@ -29,7 +28,6 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.auth.MoreCallCredentials;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 
 import org.springframework.data.annotation.Id;
 
@@ -55,11 +53,6 @@ public class FirestoreIntegrationTests {
 				"Firestore-sample tests are disabled. Please use '-Dit.firestore=true' "
 						+ "to enable them. ",
 				System.getProperty("it.firestore"), is("true"));
-
-		ch.qos.logback.classic.Logger root =
-				(ch.qos.logback.classic.Logger)
-						LoggerFactory.getLogger("io.grpc.netty");
-		root.setLevel(Level.INFO);
 
 		GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
 		CallCredentials callCredentials = MoreCallCredentials.from(credentials);
