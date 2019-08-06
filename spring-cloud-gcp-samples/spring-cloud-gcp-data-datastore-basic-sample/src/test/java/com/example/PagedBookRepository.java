@@ -16,26 +16,19 @@
 
 package com.example;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.cloud.gcp.data.datastore.repository.DatastoreRepository;
+import org.springframework.cloud.gcp.data.datastore.repository.query.Query;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
- * @author Elena Felder
+ * A Book repository for testing Pages in a Spring Boot setting.
  *
- * @since 1.2
+ * @author Chengyuan Zhao
+ *
  */
-@RefreshScope
-@RestController
-public class ExampleController {
+public interface PagedBookRepository extends DatastoreRepository<Book, Long> {
 
-	@Value("${example.message:none}")
-	private String message;
-
-	@GetMapping("/message")
-	public String getMessage() {
-		return this.message;
-	}
-
+	@Query("SELECT * FROM books")
+	Page<Book> getAllBooksByPage(Pageable pageable);
 }

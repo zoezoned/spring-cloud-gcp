@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,26 @@
 
 package com.example;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * @author Elena Felder
+ * A REST controller that tests serializing of paged responses.
  *
- * @since 1.2
+ * @author Chengyuan Zhao
  */
-@RefreshScope
 @RestController
-public class ExampleController {
+public class PagedBooksController {
 
-	@Value("${example.message:none}")
-	private String message;
+	@Autowired
+	private PagedBookRepository pagedBookRepository;
 
-	@GetMapping("/message")
-	public String getMessage() {
-		return this.message;
+	@GetMapping("/allbooksserialized")
+	public Page<Book> findAllUsers() {
+		return this.pagedBookRepository.getAllBooksByPage(PageRequest.of(0, 1));
 	}
 
 }

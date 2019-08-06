@@ -16,26 +16,16 @@
 
 package com.example;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.google.cloud.datastore.Key;
+
+import org.springframework.cloud.gcp.data.datastore.repository.DatastoreRepository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 /**
- * @author Elena Felder
+ * Repository REST resource for testing keys with ancestors.
  *
- * @since 1.2
+ * @author Chengyuan Zhao
  */
-@RefreshScope
-@RestController
-public class ExampleController {
-
-	@Value("${example.message:none}")
-	private String message;
-
-	@GetMapping("/message")
-	public String getMessage() {
-		return this.message;
-	}
-
+@RepositoryRestResource(collectionResourceRel = "instruments", path = "instruments")
+public interface InstrumentRepositoryRestResource extends DatastoreRepository<Instrument, Key> {
 }
