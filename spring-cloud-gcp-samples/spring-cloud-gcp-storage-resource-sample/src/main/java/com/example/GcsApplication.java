@@ -75,7 +75,9 @@ public class GcsApplication {
 
 		List<String> scopes = Collections.singletonList(GcpScope.STORAGE_READ_WRITE.getUrl());
 
-		return GoogleCredentials.fromStream(new FileInputStream(this.privateKeyLocation))
+		return GoogleCredentials.fromStream(
+				// You'd be reading from Vault here, not from local file.
+				new FileInputStream(this.privateKeyLocation))
 				.createScoped(scopes);
 	}
 
