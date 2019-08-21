@@ -36,6 +36,12 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-context</artifactId>
+			<version>2.2.0.BUILD-SNAPSHOT</version>
+		</dependency>
+
 		<!-- Test-related dependencies. -->
 		<dependency>
 			<groupId>org.awaitility</groupId>

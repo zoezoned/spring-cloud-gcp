@@ -16,10 +16,15 @@
 
 package com.example;
 
+import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.Storage;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.channels.Channels;
 import java.nio.charset.Charset;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.WritableResource;
@@ -39,21 +44,26 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class WebController {
 
-	@Value("gs://${gcs-resource-test-bucket}/my-file.txt")
-	private Resource gcsFile;
+	@Value("${gcs-resource-test-bucket}")
+	private String gcsBucket;
+
+	private String fileName = "my-file.txt";
+
+	@Autowired
+	private Storage storage;
 
 	@RequestMapping(value = "/", method = RequestMethod.GET)
 	public String readGcsFile() throws IOException {
+		Blob blob = storage.get(BlobId.of(this.gcsBucket, this.fileName));
 		return StreamUtils.copyToString(
-				this.gcsFile.getInputStream(),
-				Charset.defaultCharset()) + "\n";
+				Channels.newInputStream(blob.reader()), Charset.defaultCharset()) + "\n";
 	}
 
-	@RequestMapping(value = "/", method = RequestMethod.POST)
+	/*@RequestMapping(value = "/", method = RequestMethod.POST)
 	String writeGcs(@RequestBody String data) throws IOException {
 		try (OutputStream os = ((WritableResource) this.gcsFile).getOutputStream()) {
 			os.write(data.getBytes());
 		}
 		return "file was updated\n";
-	}
+	}*/
 }

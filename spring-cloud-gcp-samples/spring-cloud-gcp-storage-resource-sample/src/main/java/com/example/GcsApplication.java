@@ -16,8 +16,26 @@
 
 package com.example;
 
+import java.io.FileInputStream;
+import java.util.Collections;
+import java.util.List;
+
+import com.google.api.gax.core.CredentialsProvider;
+import com.google.api.gax.core.FixedCredentialsProvider;
+import com.google.auth.Credentials;
+import com.google.auth.oauth2.GoogleCredentials;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.cloud.gcp.core.GcpScope;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 
 /**
  * An example Spring Boot application that reads and writes files stored in Google Cloud
@@ -26,9 +44,46 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Mike Eltsufin
  */
 @SpringBootApplication
+@EnableScheduling
 public class GcsApplication {
+
+	private static final Log LOGGER = LogFactory.getLog(GcsApplication.class);
+
+	@Value("${private-key-location}")
+	private String privateKeyLocation;
+
+	@Autowired
+	org.springframework.cloud.context.scope.refresh.RefreshScope refresh;
 
 	public static void main(String[] args) {
 		SpringApplication.run(GcsApplication.class, args);
+	}
+
+	// every 10 seconds, expire the RefreshScoped credentials bean
+	@Scheduled (fixedDelay = 10000)
+	public void refreshConfiguration() {
+		LOGGER.warn("***** REFRESHING");
+		this.refresh.refresh("scopedTarget.refreshableCredentials");
+
+	}
+
+	@Bean
+	@RefreshScope
+	Credentials refreshableCredentials() throws Exception {
+		// refresh scoped beans are lazy; this will only happen when credentials attempt to be used.
+		LOGGER.warn("***** ASKED FOR NEW CREDENTIALS");
+
+		List<String> scopes = Collections.singletonList(GcpScope.STORAGE_READ_WRITE.getUrl());
+
+		return GoogleCredentials.fromStream(new FileInputStream(this.privateKeyLocation))
+				.createScoped(scopes);
+	}
+
+	@Bean
+	CredentialsProvider refreshableCredentialsProvider(Credentials refreshableCredentials) throws Exception {
+		// credentials provider is not a refresh scoped bean, so this only happens on startup!
+		LOGGER.warn("***** ASKED FOR NEW PROVIDER");
+
+		return FixedCredentialsProvider.create(refreshableCredentials);
 	}
 }
