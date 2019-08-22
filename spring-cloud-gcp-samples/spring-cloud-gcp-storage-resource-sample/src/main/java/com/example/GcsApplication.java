@@ -63,7 +63,7 @@ public class GcsApplication {
 	@Scheduled (fixedDelay = 10000)
 	public void refreshConfiguration() {
 		LOGGER.warn("***** REFRESHING");
-		this.refresh.refresh("scopedTarget.refreshableCredentials");
+		this.refresh.refresh("refreshableCredentials");
 
 	}
 
