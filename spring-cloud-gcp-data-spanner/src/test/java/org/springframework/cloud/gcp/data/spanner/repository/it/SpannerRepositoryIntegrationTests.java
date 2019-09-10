@@ -167,6 +167,8 @@ public class SpannerRepositoryIntegrationTests extends AbstractSpannerIntegratio
 		List<Trade> buyTradesRetrieved = this.tradeRepository
 				.annotatedTradesByAction("BUY");
 		assertThat(buyTradesRetrieved).containsExactlyInAnyOrderElementsOf(trader1BuyTrades);
+		assertThat(buyTradesRetrieved.get(0).getId()).isGreaterThan(buyTradesRetrieved.get(1).getId());
+		assertThat(buyTradesRetrieved.get(1).getId()).isGreaterThan(buyTradesRetrieved.get(2).getId());
 
 		List<Trade> customSortedTrades = this.tradeRepository.sortedTrades(PageRequest
 				.of(2, 2, org.springframework.data.domain.Sort.by(Order.asc("id"))));
@@ -253,6 +255,20 @@ public class SpannerRepositoryIntegrationTests extends AbstractSpannerIntegratio
 
 		this.tradeRepository.deleteAll();
 		this.tradeRepositoryTransactionalService.testTransactionalAnnotation();
+		assertThat(this.tradeRepository.count()).isEqualTo(1L);
+	}
+
+	@Test
+	public void testTransactionRolledBack() {
+		this.tradeRepository.deleteAll();
+		assertThat(this.tradeRepository.count()).isEqualTo(0L);
+		try {
+			this.tradeRepositoryTransactionalService.testTransactionRolledBack();
+		}
+		catch (RuntimeException re) {
+			// expected exception that causes roll-back;
+		}
+		assertThat(this.tradeRepository.count()).isEqualTo(0L);
 	}
 
 	private void arrayParameterBindTest() {
@@ -297,6 +313,13 @@ public class SpannerRepositoryIntegrationTests extends AbstractSpannerIntegratio
 			// because the insert happens within the same transaction, this count is still
 			// 1
 			assertThat(this.tradeRepository.count()).isEqualTo(0L);
+		}
+
+		@Transactional
+		public void testTransactionRolledBack() {
+			Trade trade = Trade.aTrade();
+			this.tradeRepository.save(trade);
+			throw new RuntimeException("Intentional error to rollback save.");
 		}
 	}
 }
